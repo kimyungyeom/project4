@@ -1,0 +1,36 @@
+@host=http://localhost:3000
+@accessToken=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjgsImlhdCI6MTcwMjAxODk2NiwiZXhwIjoxNzAyMDYyMTY2fQ.rdQ6SZyJjew_YQXQoXwa0PZ1T0fxGqLF-BnxwXCmr5Y
+
+### 상품 생성
+POST {{host}}/api/products
+Content-Type: application/json
+Authorization: {{accessToken}}
+
+{ 
+   "productName": "햄버거",
+   "content": "든든하게 배를 채워줄 불고기버거"
+}
+
+### 상품 목록 조회
+GET {{host}}/api/products?sort=desc
+Content-Type: application/json
+
+### 상품 상세 조회
+GET {{host}}/api/products/14
+Content-Type: application/json
+
+### 상품 수정
+PUT {{host}}/api/products/14
+Content-Type: application/json
+Authorization: {{accessToken}}
+
+{ 
+   "productName": "불고기 맛 햄버거",
+   "content": "든든하게 배를 채워줄 불고기버거!!",
+   "status": "SOLD_OUT"
+}
+
+### 상품 삭제
+DELETE {{host}}/api/products/14
+Content-Type: application/json
+Authorization: {{accessToken}}

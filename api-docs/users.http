@@ -1,0 +1,7 @@
+@host=http://localhost:3000
+@authToken=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjgsImlhdCI6MTcwMjAxODk2NiwiZXhwIjoxNzAyMDYyMTY2fQ.rdQ6SZyJjew_YQXQoXwa0PZ1T0fxGqLF-BnxwXCmr5Y
+
+### 내 정보 조회
+GET {{host}}/api/user/me
+Content-Type: application/json
+Authorization: {{authToken}}
