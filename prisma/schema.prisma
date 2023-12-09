@@ -32,6 +32,7 @@ model Products {
   productName String   @map("productName") 
   content     String   @map("content") @db.Text
   status      String   @default("FOR_SALE") @map("status")
+  name        String   @map("name")
   createdAt   DateTime @default(now()) @map("createdAt")
   updatedAt   DateTime @updatedAt @map("updatedAt")
 

@@ -1,17 +1,15 @@
 // import
 import express from "express";
-import Sequelize from "sequelize";
 import authMiddleware from "../middlewares/need-login.middleware.js";
-import db from "../models/index.cjs";
+import { prisma } from "../utils/prisma/index.js";
 
 // products.router.js - global variables
 const router = express.Router();
-const { Products, Users } = db;
 
 // 상품 생성 API
 router.post("/", authMiddleware, async (req, res) => {
 	try {
-		const { id: userId } = res.locals.user;
+		const { id: userId, name } = res.locals.user;
 		const { productName, content } = req.body;
 
 		// 상품명이 없는 경우
@@ -30,12 +28,19 @@ router.post("/", authMiddleware, async (req, res) => {
 			});
 		}
 
-		const createdProduct = await Products.create({ productName, content, userId });
+		const createdProduct = await prisma.products.create({
+			data: {
+				userId,
+				productName,
+				content,
+				name,
+			},
+		});
 
 		return res.status(201).json({
 			success: true,
 			message: "상품 생성이 완료되었습니다.",
-			data: { createdProduct },
+			createdProduct,
 		});
 	} catch (err) {
 		return res.status(500).send({
@@ -48,19 +53,20 @@ router.post("/", authMiddleware, async (req, res) => {
 // 상품 목록 조회 API
 router.get("/", async (req, res) => {
 	try {
-		// QueryString을 이용한 정렬 방식
-		const { sort } = req.query;
-		let upperSort = sort?.toUpperCase();
-
-		// 상품 목록 정렬 - 최신순
-		if (upperSort !== "ASC" && upperSort !== "DESC") {
-			upperSort = "DESC";
-		}
-
-		const products = await Products.findAll({
-			attributes: ["id", "productName", "content", "status", "userId", [Sequelize.col("user.name"), "name"], "createdAt", "updatedAt"],
-			order: [["createdAt", upperSort]],
-			include: { model: Users, as: "user", attributes: [] },
+		const products = await prisma.products.findMany({
+			select: {
+				id: true,
+				productName: true,
+				content: true,
+				status: true,
+				userId: true,
+				name: true,
+				createdAt: true,
+				updatedAt: true,
+			},
+			orderBy: {
+				createdAt: "desc",
+			},
 		});
 
 		return res.status(200).json({
@@ -81,10 +87,18 @@ router.get("/:productId", async (req, res) => {
 	try {
 		const { productId } = req.params;
 
-		const product = await Products.findOne({
-			where: { id: productId },
-			attributes: ["id", "productName", "content", "status", "userId", [Sequelize.col("user.name"), "name"], "createdAt", "updatedAt"],
-			include: { model: Users, as: "user", attributes: [] },
+		const product = await prisma.products.findFirst({
+			where: { id: +productId },
+			select: {
+				id: true,
+				productName: true,
+				content: true,
+				status: true,
+				userId: true,
+				name: true,
+				createdAt: true,
+				updatedAt: true,
+			},
 		});
 
 		// 일치하는 상품이 없는 경우
@@ -132,8 +146,8 @@ router.put("/:productId", authMiddleware, async (req, res) => {
 			});
 		}
 
-		const product = await Products.findOne({
-			where: { id: productId },
+		const product = await prisma.products.findFirst({
+			where: { id: +productId },
 		});
 
 		// 일치하는 상품이 없는 경우
@@ -154,12 +168,15 @@ router.put("/:productId", authMiddleware, async (req, res) => {
 		}
 
 		// 상품 수정
-		product.update({ productName, content, status }, { where: { productId } });
+		const updatedProduct = await prisma.products.update({
+			where: { id: +productId },
+			data: { productName, content, status },
+		});
 
 		return res.status(200).json({
 			success: true,
 			message: "상품 수정이 완료되었습니다.",
-			data: product,
+			data: updatedProduct,
 		});
 	} catch (err) {
 		return res.status(500).send({
@@ -175,8 +192,8 @@ router.delete("/:productId", authMiddleware, async (req, res) => {
 		const { productId } = req.params;
 		const { id: userId } = res.locals.user;
 
-		const product = await Products.findOne({
-			where: { id: productId },
+		const product = await prisma.products.findFirst({
+			where: { id: +productId },
 		});
 
 		// 일치하는 상품이 없는 경우
@@ -197,12 +214,14 @@ router.delete("/:productId", authMiddleware, async (req, res) => {
 		}
 
 		// 상품 삭제
-		product.destroy({ where: { productId } });
+		const deletedProduct = await prisma.products.delete({
+			where: { id: +productId },
+		});
 
 		return res.status(200).json({
 			success: true,
 			message: "상품 삭제가 완료되었습니다.",
-			data: product,
+			data: deletedProduct,
 		});
 	} catch (err) {
 		return res.status(500).send({
