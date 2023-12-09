@@ -2,10 +2,10 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import db from "../models/index.cjs";
+import { prisma } from "../utils/prisma/index.js";
+import { Prisma } from "@prisma/client";
 
 // auth.router.js - global variables
-const { Users } = db;
 const router = express.Router();
 
 // 회원가입 API
@@ -40,9 +40,9 @@ router.post("/signup", async (req, res) => {
 			});
 		}
 
-		// 중복 된 이메일인 경우
-		const existsUsers = await Users.findOne({ where: { email } });
-		if (existsUsers) {
+		// 중복된 이메일인 경우
+		const isExistUser = await prisma.users.findFirst({ where: { email } });
+		if (isExistUser) {
 			return res.status(409).send({
 				success: false,
 				errorMessage: "해당 이메일 이미 사용중입니다.",
@@ -52,12 +52,29 @@ router.post("/signup", async (req, res) => {
 		// 비밀번호 hash화 시키기
 		const hashedPassword = await bcrypt.hash(password, 10);
 
-		// 이메일, 닉네임, 해시화한 비밀번호를 저장하고 회원가입 성공 시, 비밀번호를 제외 한 사용자 정보 반환.
-		await Users.create({ email, name, password: hashedPassword });
+		// 이메일, 닉네임, 해시화한 비밀번호를 저장
+		const [user] = await prisma.$transaction(
+			async (tx) => {
+				//Users 테이블에 사용자 생성
+				const user = await tx.users.create({
+					data: {
+						email,
+						name,
+						password: hashedPassword,
+					},
+				});
+
+				return [user];
+			},
+			{
+				isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
+			},
+		);
+
 		res.status(201).json({
 			success: true,
 			message: "회원가입 되신 것을 축하드립니다!",
-			data: { email, name },
+			data: { email: user.email, name: user.name },
 		});
 	} catch (err) {
 		console.error(err);
@@ -84,7 +101,7 @@ router.post("/login", async (req, res) => {
 		}
 
 		// 해당 이메일을 가진 유저가 없는 경우
-		const user = await Users.findOne({ where: { email } });
+		const user = await prisma.users.findFirst({ where: { email } });
 		if (!user) {
 			return res.status(404).send({
 				success: false,
