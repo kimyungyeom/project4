@@ -53,23 +53,13 @@ router.post("/signup", async (req, res) => {
 		const hashedPassword = await bcrypt.hash(password, 10);
 
 		// 이메일, 닉네임, 해시화한 비밀번호를 저장
-		const [user] = await prisma.$transaction(
-			async (tx) => {
-				//Users 테이블에 사용자 생성
-				const user = await tx.users.create({
-					data: {
-						email,
-						name,
-						password: hashedPassword,
-					},
-				});
-
-				return [user];
+		const user = await prisma.users.create({
+			data: {
+				email,
+				name,
+				password: hashedPassword,
 			},
-			{
-				isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
-			},
-		);
+		});
 
 		res.status(201).json({
 			success: true,
