@@ -1,9 +1,6 @@
 // import
 import jwt from "jsonwebtoken";
-import db from "../models/index.cjs";
-
-// need-login.middleware.js - global variables
-const { Users } = db;
+import { prisma } from "../utils/prisma/index.js";
 
 // 사용자 인증 미들웨어
 const auth = async (req, res, next) => {
@@ -36,7 +33,9 @@ const auth = async (req, res, next) => {
 
 		// 복호화
 		const { userId } = jwt.verify(authToken, process.env.JWT_SECRET_KEY);
-		const user = await Users.findByPk(userId);
+		const user = await prisma.users.findFirst({
+			where: { id: +userId },
+		});
 
 		// 일치하는 유저 ID가 없는 경우
 		if (!user) {
