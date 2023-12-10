@@ -5,6 +5,16 @@ export class ProductsService {
 	}
 
 	createProduct = async (userId, productName, content, name) => {
+		// 상품명이 없는 경우
+		if (!productName) {
+			throw new Error("EmptyProductName");
+		}
+
+		// 상품 설명이 없는 경우
+		if (!content) {
+			throw new Error("EmptyContent");
+		}
+
 		const createdProduct = await this.productsRepository.createProduct(userId, productName, content, name);
 
 		return createdProduct;

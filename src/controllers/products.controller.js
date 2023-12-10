@@ -10,16 +10,6 @@ export class ProductsController {
 			const { id: userId, name } = res.locals.user;
 			const { productName, content } = req.body;
 
-			// 상품명이 없는 경우
-			if (!productName) {
-				throw new Error("EmptyProductName");
-			}
-
-			// 상품 설명이 없는 경우
-			if (!content) {
-				throw new Error("EmptyContent");
-			}
-
 			// 서비스 계층에 구현된 createProduct 로직을 실행
 			const createdProduct = await this.productsService.createProduct(userId, productName, content, name);
 

@@ -9,18 +9,8 @@ export class AuthController {
 		try {
 			const { email, name, password, confirmPassword } = req.body;
 
-			// 입력란 중 빈 곳이 있는 경우
-			if (!email || !name || !password || !confirmPassword) {
-				throw new Error("EmptyValue");
-			}
-
-			// 비밀번호 조건을 만족하지 않는 경우
-			if (password.length < 6 || password !== confirmPassword) {
-				throw new Error("PasswordConditionNotSatisfy");
-			}
-
 			// 서비스 계층에 구현된 signUp 로직을 실행
-			const user = await this.authService.signUp(email, password, name);
+			const user = await this.authService.signUp(email, password, name, confirmPassword);
 
 			res.status(201).json({
 				success: true,
@@ -36,11 +26,6 @@ export class AuthController {
 	logIn = async (req, res, next) => {
 		try {
 			const { email, password } = req.body;
-
-			// 입력란 중 빈 곳이 있는 경우
-			if (!email || !password) {
-				throw new Error("EmptyValue");
-			}
 
 			// 서비스 계층에 구현된 logIn 로직을 실행
 			const logInUser = await this.authService.logIn(email, password);
