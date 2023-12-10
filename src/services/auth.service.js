@@ -8,7 +8,17 @@ export class AuthService {
 		this.authRepository = authRepository;
 	}
 
-	signUp = async (email, password, name) => {
+	signUp = async (email, password, name, confirmPassword) => {
+		// 입력란 중 빈 곳이 있는 경우
+		if (!email || !name || !password || !confirmPassword) {
+			throw new Error("EmptyValue");
+		}
+
+		// 비밀번호 조건을 만족하지 않는 경우
+		if (password.length < 6 || password !== confirmPassword) {
+			throw new Error("PasswordConditionNotSatisfy");
+		}
+
 		// 이메일 형식이 아닌 경우
 		const emailRegex = /^[A-Za-z0-9_\.\-]+@[A-Za-z0-9\-]+\.[A-Za-z0-9\-]+/;
 		const isValidEmail = emailRegex.test(email);
@@ -38,6 +48,11 @@ export class AuthService {
 	};
 
 	logIn = async (email, password) => {
+		// 입력란 중 빈 곳이 있는 경우
+		if (!email || !password) {
+			throw new Error("EmptyValue");
+		}
+
 		// 해당 이메일을 가진 유저가 없는 경우
 		const user = await this.authRepository.findUserByEmail(email);
 		if (!user) {
