@@ -41,7 +41,7 @@ export class AuthService {
 	// 로그인
 	logIn = async (email, password) => {
 		// 해당 이메일을 가진 유저가 없는 경우
-		const user = await this.authRepository.findOneUserByEmail(email);
+		const user = await this.authRepository.findUserByEmail(email);
 		if (!user) {
 			throw new Error("NotExistUserByEmail");
 		}
