@@ -24,7 +24,7 @@ export class AuthRepository {
 		return newUser;
 	};
 
-	findOneUserByEmail = async (email) => {
+	findUserByEmail = async (email) => {
 		const user = await this.prisma.users.findUnique({
 			where: {
 				email,
