@@ -8,7 +8,6 @@ export class AuthService {
 		this.authRepository = authRepository;
 	}
 
-	// 회원가입
 	signUp = async (email, password, name) => {
 		// 이메일 형식이 아닌 경우
 		const emailRegex = /^[A-Za-z0-9_\.\-]+@[A-Za-z0-9\-]+\.[A-Za-z0-9\-]+/;
@@ -38,7 +37,6 @@ export class AuthService {
 		};
 	};
 
-	// 로그인
 	logIn = async (email, password) => {
 		// 해당 이메일을 가진 유저가 없는 경우
 		const user = await this.authRepository.findUserByEmail(email);
