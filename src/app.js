@@ -14,6 +14,9 @@ import authRouter from "./routes/auth.router.js";
 import usersRouter from "./routes/users.router.js";
 import productsRouter from "./routes/products.router.js";
 
+// import errorHandler
+import ErrorHandlingMiddleware from "./middlewares/error-handler.middleware.js";
+
 // global variables
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -23,6 +26,9 @@ app.use(cookieParser());
 app.use("/api/auth", authRouter);
 app.use("/api/user", usersRouter);
 app.use("/api/products", productsRouter);
+
+// errorHandler
+app.use(ErrorHandlingMiddleware);
 
 // 서버 구동
 app.listen(port, () => {
